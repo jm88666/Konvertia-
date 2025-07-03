@@ -21,7 +21,11 @@ client.on('ready', () => {
     console.log('✅ WhatsApp is verbonden en klaar!');
 });
 
-client.initialize();
+const startClient = async () => {
+  await client.initialize();
+};
+
+startClient();
 
 app.post('/send', async (req, res) => {
     const { phone, message } = req.body;
