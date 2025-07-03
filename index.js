@@ -4,6 +4,12 @@ const app = express();
 app.use(express.json());
 
 const client = new Client({
+  puppeteer: {
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    headless: true
+  }
+});
+
   authStrategy: new LocalAuth()
 });
 
