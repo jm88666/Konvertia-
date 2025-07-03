@@ -1,15 +1,14 @@
-const { Client } = require('whatsapp-web.js');
+const { Client, LocalAuth } = require('whatsapp-web.js');
 const express = require('express');
-const qrcode = require('qrcode-terminal');
 const app = express();
 app.use(express.json());
 
-const SESSION_NAME = process.env.SESSION_NAME || 'session';
-const client = new Client();
+const client = new Client({
+  authStrategy: new LocalAuth()
+});
 
 client.on('qr', (qr) => {
   console.log('Scan deze QR met WhatsApp:');
-  qrcode.generate(qr, { small: true });
 });
 
 client.on('ready', () => {
@@ -20,10 +19,11 @@ client.initialize();
 
 app.post('/send', async (req, res) => {
   const { phone, message } = req.body;
-  if (!phone || !message) return res.status(400).send('phone en message zijn verplicht');
+  if (!phone || !message) return res.status(400).send('📛 phone en message zijn verplicht');
+
   try {
     await client.sendMessage(phone, message);
-    return res.send('✅ Bericht verzonden');
+    return res.send('✅ Bericht verzonden!');
   } catch (err) {
     console.error('❌ Fout bij verzenden:', err);
     return res.status(500).send('❌ Fout bij verzenden');
