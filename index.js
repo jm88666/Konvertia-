@@ -1,45 +1,52 @@
+
+const qrcode = require('qrcode-terminal');
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const express = require('express');
-const qrcode = require('qrcode-terminal');
 
 const app = express();
 app.use(express.json());
 
 const client = new Client({
-    authStrategy: new LocalAuth(),
-    puppeteer: {
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-    }
+  authStrategy: new LocalAuth()
 });
 
 client.on('qr', (qr) => {
-    console.log('Scan deze QR met WhatsApp:');
-    qrcode.generate(qr, { small: true });
+  console.log('📱 Scan deze QR met WhatsApp:');
+  qrcode.generate(qr, { small: true });
 });
 
 client.on('ready', () => {
-    console.log('✅ WhatsApp is verbonden en klaar!');
+  console.log('✅ WhatsApp is verbonden en klaar!');
 });
 
-const startClient = async () => {
-  await client.initialize();
-};
+client.on('auth_failure', (msg) => {
+  console.error('❌ Authentie fout:', msg);
+});
 
-startClient();
+client.on('disconnected', (reason) => {
+  console.log('🔌 Verbinding verbroken:', reason);
+});
+
+client.initialize();
 
 app.post('/send', async (req, res) => {
-    const { phone, message } = req.body;
-    if (!phone || !message) return res.status(400).send('phone en message zijn verplicht');
-    try {
-        await client.sendMessage(phone, message);
-        return res.send('✅ Bericht verzonden');
-    } catch (err) {
-        console.error('❌ Fout bij verzenden:', err);
-        return res.status(500).send('❌ Fout bij verzenden');
-    }
+  const { message, phone } = req.body;
+
+  if (!message || !phone) {
+    return res.status(400).send('Fout: message en phone zijn verplicht');
+  }
+
+  try {
+    const chatId = phone.includes('@g.us') ? phone : `31${phone.replace(/^0/, '')}@c.us`;
+    const chat = await client.getChatById(chatId);
+    await chat.sendMessage(message);
+    res.send('✅ Bericht verzonden!');
+  } catch (error) {
+    console.error('❌ Fout bij verzenden:', error);
+    res.status(500).send('Fout bij verzenden');
+  }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`🚀 Server draait op poort ${PORT}`);
+app.listen(3000, () => {
+  console.log('🚀 Webhook actief op http://localhost:3000/send');
 });
