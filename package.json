@@ -2,10 +2,8 @@
   "name": "whatsapp-railway-bot",
   "version": "1.0.0",
   "main": "index.js",
-"scripts": {
-  "start": "node unzip-session.js && node index.js"
-}
-    "start": "node index.js"
+  "scripts": {
+    "start": "node unzip-session.js && node index.js"
   },
   "dependencies": {
     "express": "^4.18.2",
