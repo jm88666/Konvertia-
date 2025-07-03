@@ -1,0 +1,15 @@
+[phases.setup]
+nixPkgs = [
+  "libGL",
+  "nss",
+  "atk",
+  "cups",
+  "libxshmfence",
+  "libdrm",
+  "mesa",
+  "pango",
+  "libgudev",
+  "gdk-pixbuf",
+  "gtk3",
+  "chromium"
+]
