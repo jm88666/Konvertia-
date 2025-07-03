@@ -1,15 +1,8 @@
 [phases.setup]
-nixPkgs = [
-  "libGL",
-  "nss",
-  "atk",
-  "cups",
-  "libxshmfence",
-  "libdrm",
-  "mesa",
-  "pango",
-  "libgudev",
-  "gdk-pixbuf",
-  "gtk3",
-  "chromium"
-]
+nixPkgs = ['git', 'nodejs-18_x', 'chromium']
+
+[phases.install]
+cmds = ['npm install']
+
+[start]
+cmd = "node index.js"
