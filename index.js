@@ -39,7 +39,7 @@ app.post('/send', async (req, res) => {
 
   try {
     const chatId = phone.includes('@g.us') ? phone : `31${phone.replace(/^0/, '')}@c.us`;
-    await client.sendMessage(chatId, message); // 🔁 GEWIJZIGD
+    await client.sendMessage(chatId, message); // ✅ DIRECT sturen
     res.send('✅ Bericht verzonden!');
   } catch (error) {
     console.error('❌ Fout bij verzenden:', error);
