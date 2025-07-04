@@ -5,10 +5,10 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 
-const client = new Client({
-  authStrategy: new LocalAuth({
-    dataPath: './session'
-    clientId: 'railway'
+authStrategy: new LocalAuth({
+  dataPath: './session',
+  clientId: 'railway'
+})
   })
 });
 
