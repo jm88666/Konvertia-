@@ -7,7 +7,7 @@ app.use(express.json());
 
 const client = new Client({
   authStrategy: new LocalAuth({
-    clientId: 'railway'
+    clientId: 'railway' // Sessies opgeslagen in /session/railway
   })
 });
 
@@ -21,7 +21,7 @@ client.on('ready', () => {
 });
 
 client.on('auth_failure', (msg) => {
-  console.error('❌ Authentie fout:', msg);
+  console.error('❌ Authenticatiefout:', msg);
 });
 
 client.on('disconnected', (reason) => {
@@ -38,10 +38,15 @@ app.post('/send', async (req, res) => {
     return res.status(400).send('Fout: message en phone zijn verplicht');
   }
 
+  const chatId = phone.includes('@g.us')
+    ? phone
+    : `31${phone.replace(/^0/, '')}@c.us`;
+
   try {
-    const chatId = phone.includes('@g.us')
-      ? phone
-      : `31${phone.replace(/^0/, '')}@c.us`;
+    if (!client.info || !client.info.wid) {
+      console.warn('📴 Client nog niet klaar om berichten te verzenden');
+      return res.status(503).send('WhatsApp client is nog niet klaar');
+    }
 
     console.log(`📤 Bericht wordt verzonden naar ${chatId}: "${message}"`);
 
