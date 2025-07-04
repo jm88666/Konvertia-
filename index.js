@@ -1,4 +1,5 @@
-
+const fs = require('fs');
+const unzipper = require('unzipper');
 const qrcode = require('qrcode-terminal');
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const express = require('express');
@@ -6,47 +7,65 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 
-const client = new Client({
-  authStrategy: new LocalAuth()
-});
+function startBot() {
+  const client = new Client({
+    authStrategy: new LocalAuth({
+      dataPath: './session'
+    })
+  });
 
-client.on('qr', (qr) => {
-  console.log('📱 Scan deze QR met WhatsApp:');
-  qrcode.generate(qr, { small: true });
-});
+  client.on('qr', (qr) => {
+    console.log('📱 Scan deze QR met WhatsApp:');
+    qrcode.generate(qr, { small: true });
+  });
 
-client.on('ready', () => {
-  console.log('✅ WhatsApp is verbonden en klaar!');
-});
+  client.on('ready', () => {
+    console.log('✅ WhatsApp is verbonden en klaar!');
+  });
 
-client.on('auth_failure', (msg) => {
-  console.error('❌ Authentie fout:', msg);
-});
+  client.on('auth_failure', (msg) => {
+    console.error('❌ Authentie fout:', msg);
+  });
 
-client.on('disconnected', (reason) => {
-  console.log('🔌 Verbinding verbroken:', reason);
-});
+  client.on('disconnected', (reason) => {
+    console.log('🔌 Verbinding verbroken:', reason);
+  });
 
-client.initialize();
+  client.initialize();
 
-app.post('/send', async (req, res) => {
-  const { message, phone } = req.body;
+  app.post('/send', async (req, res) => {
+    const { message, phone } = req.body;
 
-  if (!message || !phone) {
-    return res.status(400).send('Fout: message en phone zijn verplicht');
-  }
+    if (!message || !phone) {
+      return res.status(400).send('Fout: message en phone zijn verplicht');
+    }
 
-  try {
-    const chatId = phone.includes('@g.us') ? phone : `31${phone.replace(/^0/, '')}@c.us`;
-    const chat = await client.getChatById(chatId);
-    await chat.sendMessage(message);
-    res.send('✅ Bericht verzonden!');
-  } catch (error) {
-    console.error('❌ Fout bij verzenden:', error);
-    res.status(500).send('Fout bij verzenden');
-  }
-});
+    try {
+      const chatId = phone.includes('@g.us') ? phone : `31${phone.replace(/^0/, '')}@c.us`;
+      const chat = await client.getChatById(chatId);
+      await chat.sendMessage(message);
+      res.send('✅ Bericht verzonden!');
+    } catch (error) {
+      console.error('❌ Fout bij verzenden:', error);
+      res.status(500).send('Fout bij verzenden');
+    }
+  });
 
-app.listen(3000, () => {
-  console.log('🚀 Webhook actief op http://localhost:3000/send');
-});
+  const port = process.env.PORT || 3000;
+  app.listen(port, () => {
+    console.log(`🚀 Webhook actief op http://localhost:${port}/send`);
+  });
+}
+
+// Eerst sessie uitpakken, dan bot starten
+if (!fs.existsSync('./session/Default')) {
+  console.log('📦 Uitpakken van sessie.zip...');
+  fs.createReadStream('session.zip')
+    .pipe(unzipper.Extract({ path: './session' }))
+    .on('close', () => {
+      console.log('✅ Sessie uitgepakt!');
+      startBot();
+    });
+} else {
+  startBot();
+}
