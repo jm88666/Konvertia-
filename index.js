@@ -5,11 +5,9 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 
-// 👉 Gebruik lokale sessie-opslag uit je projectmap
 const client = new Client({
   authStrategy: new LocalAuth({
-    dataPath: './session',      // Zorg dat ./session/Default in je repo staat
-    clientId: 'railway'         // voorkomt dubbele paden zoals ./session/session
+    clientId: 'railway' // Laat 'dataPath' weg om fout te voorkomen
   })
 });
 
@@ -23,7 +21,7 @@ client.on('ready', () => {
 });
 
 client.on('auth_failure', (msg) => {
-  console.error('❌ Authenticatiefout:', msg);
+  console.error('❌ Authentie fout:', msg);
 });
 
 client.on('disconnected', (reason) => {
@@ -32,7 +30,6 @@ client.on('disconnected', (reason) => {
 
 client.initialize();
 
-// 📨 Webhook om berichten te ontvangen vanaf bijvoorbeeld Google Sheets
 app.post('/send', async (req, res) => {
   const { message, phone } = req.body;
 
@@ -51,7 +48,6 @@ app.post('/send', async (req, res) => {
   }
 });
 
-// 🌐 Start de Express-server
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`🚀 Webhook actief op http://localhost:${port}/send`);
