@@ -5,10 +5,10 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 
-authStrategy: new LocalAuth({
-  dataPath: './session',
-  clientId: 'railway'
-})
+const client = new Client({
+  authStrategy: new LocalAuth({
+    dataPath: './session',
+    clientId: 'railway'
   })
 });
 
@@ -22,7 +22,7 @@ client.on('ready', () => {
 });
 
 client.on('auth_failure', (msg) => {
-  console.error('❌ Authentie fout:', msg);
+  console.error('❌ Authenticatie fout:', msg);
 });
 
 client.on('disconnected', (reason) => {
@@ -51,5 +51,4 @@ app.post('/send', async (req, res) => {
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log(`🚀 Webhook actief op http://localhost:${port}/send`);
-});
+  console.log(`🚀 Webhook actief op http://localhost:${port
