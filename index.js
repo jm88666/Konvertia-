@@ -34,15 +34,23 @@ app.post('/send', async (req, res) => {
   const { message, phone } = req.body;
 
   if (!message || !phone) {
+    console.log('❌ Ontbrekende parameters:', req.body);
     return res.status(400).send('Fout: message en phone zijn verplicht');
   }
 
   try {
-    const chatId = phone.includes('@g.us') ? phone : `31${phone.replace(/^0/, '')}@c.us`;
-    await client.sendMessage(chatId, message); // ✅ DIRECT sturen
+    const chatId = phone.includes('@g.us')
+      ? phone
+      : `31${phone.replace(/^0/, '')}@c.us`;
+
+    console.log(`📤 Bericht wordt verzonden naar ${chatId}: "${message}"`);
+
+    await client.sendMessage(chatId, message);
+
+    console.log('✅ Bericht succesvol verzonden!');
     res.send('✅ Bericht verzonden!');
   } catch (error) {
-    console.error('❌ Fout bij verzenden:', error);
+    console.error('❌ VERZEND FOUT:', error);
     res.status(500).send('Fout bij verzenden');
   }
 });
