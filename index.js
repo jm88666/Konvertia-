@@ -7,7 +7,7 @@ app.use(express.json());
 
 const client = new Client({
   authStrategy: new LocalAuth({
-    clientId: 'railway' // Laat 'dataPath' weg om fout te voorkomen
+    clientId: 'railway'
   })
 });
 
@@ -39,8 +39,7 @@ app.post('/send', async (req, res) => {
 
   try {
     const chatId = phone.includes('@g.us') ? phone : `31${phone.replace(/^0/, '')}@c.us`;
-    const chat = await client.getChatById(chatId);
-    await chat.sendMessage(message);
+    await client.sendMessage(chatId, message); // 🔁 GEWIJZIGD
     res.send('✅ Bericht verzonden!');
   } catch (error) {
     console.error('❌ Fout bij verzenden:', error);
