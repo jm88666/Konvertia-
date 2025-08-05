@@ -1,6 +1,5 @@
 import { Client, LocalAuth } from 'whatsapp-web.js';
 import express from 'express';
-import qrcode from 'qrcode-terminal';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -9,19 +8,27 @@ app.use(express.json());
 
 const client = new Client({
   authStrategy: new LocalAuth({ clientId: 'planning' }),
+  webVersionCache: {
+    type: 'remote',
+    remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html',
+  },
+  authTimeoutMs: 0,
+  takeoverOnConflict: true,
+  syncFullHistory: true,
+  usePairingCode: true, // 🔑 Belangrijk: koppelcode ipv QR
   puppeteer: {
     headless: true,
-    args: ['--no-sandbox']
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
   }
 });
 
-client.on('qr', qr => {
-  console.log('🔐 Scan de QR-code hieronder:');
-  qrcode.generate(qr, { small: true });
+client.on('pairing-code', code => {
+  console.log(`🔗 Koppelcode: ${code}`);
+  console.log('➡️ Ga op je telefoon naar WhatsApp > Instellingen > Gekoppelde apparaten > Apparaat koppelen');
 });
 
 client.on('ready', () => {
-  console.log('✅ WhatsApp-bot is klaar!');
+  console.log('✅ Bot is klaar en gekoppeld aan WhatsApp!');
 });
 
 client.initialize();
@@ -42,5 +49,5 @@ app.post('/send', async (req, res) => {
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log(`🚀 Server draait op http://localhost:${port}`);
+  console.log(`🚀 Server live op http://localhost:${port}`);
 });
