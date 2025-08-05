@@ -9,7 +9,7 @@ const app = express();
 app.use(express.json());
 
 const client = new Client({
-  authStrategy: new LocalAuth({ clientId: 'planning' }),
+authStrategy: new LocalAuth({ clientId: 'planning', dataPath: './auth_data' }),
   authTimeoutMs: 0,
   takeoverOnConflict: true,
   syncFullHistory: true,
@@ -51,3 +51,4 @@ const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`🚀 Server live op http://localhost:${port}`);
 });
+
