@@ -1,52 +1,46 @@
-const express = require('express');
-const { Client } = require('whatsapp-web.js');
-const { useRemoteAuth, RemoteAuthConfig } = require('whatsapp-web.js');
-const { MongoStore } = require('wwebjs-mongo');
-const mongoose = require('mongoose');
+import { Client, LocalAuth } from 'whatsapp-web.js';
+import express from 'express';
+import qrcode from 'qrcode-terminal';
+import dotenv from 'dotenv';
 
+dotenv.config();
 const app = express();
 app.use(express.json());
 
-const mongoUrl = process.env.MONGO_URL; // Voeg deze toe bij Railway → Variables
+const client = new Client({
+  authStrategy: new LocalAuth({ clientId: 'planning' }),
+  puppeteer: {
+    headless: true,
+    args: ['--no-sandbox']
+  }
+});
 
-mongoose.connect(mongoUrl).then(() => {
-  const store = new MongoStore({ mongoose });
+client.on('qr', qr => {
+  console.log('🔐 Scan de QR-code hieronder:');
+  qrcode.generate(qr, { small: true });
+});
 
-  const client = new Client({
-    authStrategy: new RemoteAuth({
-      store,
-      backupSyncIntervalMs: 300000
-    })
-  });
+client.on('ready', () => {
+  console.log('✅ WhatsApp-bot is klaar!');
+});
 
-  client.on('ready', () => {
-    console.log('✅ WhatsApp is verbonden en klaar!');
-  });
+client.initialize();
 
-  client.on('message', msg => {
-    console.log('📩 Bericht ontvangen:', msg.body);
-  });
+app.post('/send', async (req, res) => {
+  const { phone, message } = req.body;
 
-  client.initialize();
+  try {
+    const chatId = phone.includes('@') ? phone : `${phone}@c.us`;
+    await client.sendMessage(chatId, message);
+    console.log(`✅ Bericht verzonden naar ${chatId}`);
+    res.status(200).send('Bericht verzonden');
+  } catch (err) {
+    console.error('❌ Fout bij verzenden:', err);
+    res.status(500).send('Fout bij verzenden');
+  }
+});
 
-  app.post('/send', async (req, res) => {
-    const { phone, message } = req.body;
-    if (!phone || !message) {
-      return res.status(400).send('❌ Vereist: phone & message');
-    }
-
-    try {
-      const chatId = phone.includes('@g.us') ? phone : `31${phone.replace(/^0/, '')}@c.us`;
-      await client.sendMessage(chatId, message);
-      res.send('✅ Bericht verzonden!');
-    } catch (error) {
-      console.error('❌ Fout bij verzenden:', error);
-      res.status(500).send('❌ Verzendfout');
-    }
-  });
-
-  const port = process.env.PORT || 3000;
-  app.listen(port, () => {
-    console.log(`🚀 Server draait op http://localhost:${port}`);
-  });
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`🚀 Server draait op http://localhost:${port}`);
 });
