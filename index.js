@@ -9,10 +9,6 @@ app.use(express.json());
 
 const client = new Client({
   authStrategy: new LocalAuth({ clientId: 'planning' }),
-  webVersionCache: {
-    type: 'remote',
-    remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html',
-  },
   authTimeoutMs: 0,
   takeoverOnConflict: true,
   syncFullHistory: true,
@@ -22,6 +18,7 @@ const client = new Client({
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   }
 });
+
 
 client.on('pairing-code', code => {
   console.log(`🔗 Koppelcode: ${code}`);
