@@ -12,12 +12,14 @@ const client = new Client({
   authTimeoutMs: 0,
   takeoverOnConflict: true,
   syncFullHistory: true,
-  usePairingCode: true, // 🔑 Belangrijk: koppelcode ipv QR
+  usePairingCode: true,
   puppeteer: {
+    executablePath: puppeteer.executablePath(), // ⬅️ dit is de fix
     headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   }
 });
+
 
 
 client.on('pairing-code', code => {
