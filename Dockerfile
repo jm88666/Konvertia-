@@ -2,15 +2,14 @@ FROM ghcr.io/puppeteer/puppeteer:latest
 
 WORKDIR /app
 
-COPY package*.json ./
+# Kopieer alle code vóór install
+COPY . .
 
-# 🔧 Forceer juiste versie van whatsapp-web.js
+# 🔧 Installeer whatsapp-web.js@1.24.0 expliciet
 RUN npm install whatsapp-web.js@1.24.0
 
-# 📦 Installeer overige dependencies
+# 📦 Installeer overige dependencies uit package.json
 RUN npm install
-
-COPY . .
 
 EXPOSE 8888
 
