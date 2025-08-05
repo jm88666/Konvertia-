@@ -9,7 +9,11 @@ const app = express();
 app.use(express.json());
 
 const client = new Client({
-authStrategy: new LocalAuth({ clientId: 'planning', dataPath: './auth_data' }),
+  authStrategy: new LocalAuth({
+    clientId: 'planning',
+    dataPath: './auth_data',
+    wipe: true
+  }),
   authTimeoutMs: 0,
   takeoverOnConflict: true,
   syncFullHistory: true,
@@ -29,6 +33,14 @@ client.on('pairing-code', code => {
 
 client.on('ready', () => {
   console.log('✅ Bot is klaar en gekoppeld aan WhatsApp!');
+});
+
+client.on('auth_failure', msg => {
+  console.error('❌ AUTH FAIL:', msg);
+});
+
+client.on('disconnected', reason => {
+  console.warn('⚠️ Bot disconnected:', reason);
 });
 
 client.initialize();
@@ -51,4 +63,3 @@ const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`🚀 Server live op http://localhost:${port}`);
 });
-
