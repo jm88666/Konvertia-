@@ -6,12 +6,12 @@ app.use(express.json());
 
 const client = new Client({
   authStrategy: useMobileWithPhoneNumber({
-    phoneNumber: '31629189050', // 🔁 vervang dit met jouw 31-nummer
+    phoneNumber: '31629189050', // ← jouw 06-nummer zonder nul
     registration: {
       enabled: true,
       waitForCode: async (code) => {
         console.log('\n🔐 KOPPELCODE ONTVANGEN!');
-        console.log('➡️ Voer deze code in via WhatsApp op je telefoon:');
+        console.log('➡️ Voer deze code in op WhatsApp op je telefoon:');
         console.log(`\n🟢 ${code}\n`);
       }
     }
