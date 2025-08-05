@@ -1,17 +1,18 @@
 const express = require('express');
-const { Client, useMobileWithPhoneNumber } = require('whatsapp-web.js');
+const { Client } = require('whatsapp-web.js');
+const { useMobileWithPhoneNumber } = require('whatsapp-web.js/strategies/auth');
 
 const app = express();
 app.use(express.json());
 
 const client = new Client({
   authStrategy: useMobileWithPhoneNumber({
-    phoneNumber: '31629189050', // ← jouw 06-nummer zonder nul
+    phoneNumber: '31629189050', // vervang door jouw nummer zonder 0, met 31
     registration: {
       enabled: true,
       waitForCode: async (code) => {
         console.log('\n🔐 KOPPELCODE ONTVANGEN!');
-        console.log('➡️ Voer deze code in op WhatsApp op je telefoon:');
+        console.log('➡️ Voer deze code in via WhatsApp op je telefoon:');
         console.log(`\n🟢 ${code}\n`);
       }
     }
@@ -36,7 +37,6 @@ app.post('/send', async (req, res) => {
   const { message, phone } = req.body;
 
   if (!message || !phone) {
-    console.log('❌ Ontbrekende parameters:', req.body);
     return res.status(400).send('Fout: message en phone zijn verplicht');
   }
 
@@ -46,16 +46,12 @@ app.post('/send', async (req, res) => {
 
   try {
     if (!client.info || !client.info.wid) {
-      console.warn('📴 Client nog niet klaar om berichten te verzenden');
       return res.status(503).send('WhatsApp client is nog niet klaar');
     }
 
-    console.log(`📤 Bericht wordt verzonden naar ${chatId}: "${message}"`);
     await client.sendMessage(chatId, message);
-    console.log('✅ Bericht succesvol verzonden!');
     res.send('✅ Bericht verzonden!');
   } catch (error) {
-    console.error('❌ VERZEND FOUT:', error);
     res.status(500).send('Fout bij verzenden');
   }
 });
