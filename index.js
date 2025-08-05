@@ -1,19 +1,23 @@
-const qrcode = require('qrcode-terminal');
-const { Client, LocalAuth } = require('whatsapp-web.js');
+const { Client, useMobileWithPhoneNumber } = require('whatsapp-web.js');
 const express = require('express');
 
 const app = express();
 app.use(express.json());
 
-const client = new Client({
-  authStrategy: new LocalAuth({
-    clientId: 'railway' // Sessies opgeslagen in /session/railway
-  })
-});
+// ✅ Vervang dit door je eigen 31-nummer zonder 0
+const phoneNumber = '31629189050';
 
-client.on('qr', (qr) => {
-  console.log('📱 Scan deze QR met WhatsApp:');
-  qrcode.generate(qr, { small: true });
+const client = new Client({
+  authStrategy: useMobileWithPhoneNumber({
+    phoneNumber,
+    registration: {
+      enabled: true,
+      waitForCode: async () => {
+        console.log('📱 Open WhatsApp op je telefoon > Gekoppelde apparaten > “Heb je geen QR-code?”');
+        console.log('✏️ Voer daar de 8-cijferige koppelcode in om te koppelen.');
+      }
+    }
+  })
 });
 
 client.on('ready', () => {
@@ -49,7 +53,6 @@ app.post('/send', async (req, res) => {
     }
 
     console.log(`📤 Bericht wordt verzonden naar ${chatId}: "${message}"`);
-
     await client.sendMessage(chatId, message);
 
     console.log('✅ Bericht succesvol verzonden!');
