@@ -16,7 +16,7 @@ const client = new Client({
   authStrategy: new LocalAuth({ clientId: 'planning' }),
   puppeteer: {
     executablePath: puppeteer.executablePath(),
-    headless: false, // ❗️ tijdelijke debugmodus (zet later terug op true)
+    headless: 'new', // ❗️ tijdelijke debugmodus (zet later terug op true)
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   },
   authTimeoutMs: 0,
