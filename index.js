@@ -1,3 +1,5 @@
+console.log('🟡 Bot wordt geïnitialiseerd...');
+
 import puppeteer from 'puppeteer';
 import pkg from 'whatsapp-web.js';
 const { Client, LocalAuth } = pkg;
@@ -8,17 +10,19 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
+console.log('🛠️ Puppeteer executable path:', puppeteer.executablePath());
+
 const client = new Client({
   authStrategy: new LocalAuth({ clientId: 'planning' }),
   puppeteer: {
     executablePath: puppeteer.executablePath(),
-    headless: true,
+    headless: false, // ❗️ tijdelijke debugmodus (zet later terug op true)
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   },
   authTimeoutMs: 0,
   takeoverOnConflict: true,
   syncFullHistory: true,
-  usePairingCode: true, // ✅ hierdoor krijg je een koppeling via code (geen QR)
+  usePairingCode: true
 });
 
 client.on('pairing-code', (code) => {
@@ -39,7 +43,19 @@ client.on('disconnected', (reason) => {
   console.warn('📴 Bot is losgekoppeld:', reason);
 });
 
-client.initialize();
+client.on('loading_screen', (pct, msg) => {
+  console.log(`📶 Laden: ${pct}% - ${msg}`);
+});
+
+client.on('qr', () => {
+  console.warn('⚠️ QR-code ontvangen (had pairing-code moeten zijn)');
+});
+
+client.initialize().then(() => {
+  console.log('🚀 Client initialized');
+}).catch(err => {
+  console.error('💥 Fout bij initialisatie:', err);
+});
 
 app.post('/send', async (req, res) => {
   const { phone, message } = req.body;
@@ -57,5 +73,5 @@ app.post('/send', async (req, res) => {
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log(`🚀 Server live op http://localhost:${port}`);
+  console.log(`🌐 Server live op http://localhost:${port}`);
 });
