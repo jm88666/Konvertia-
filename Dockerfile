@@ -1,6 +1,5 @@
 FROM node:18
 
-# Installeer vereiste Chrome libraries
 RUN apt-get update && apt-get install -y \
   libnss3 \
   libatk-bridge2.0-0 \
