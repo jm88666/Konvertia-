@@ -22,6 +22,7 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 COPY . .
+RUN rm -rf .wwebjs_auth
 
 RUN npm install
 
